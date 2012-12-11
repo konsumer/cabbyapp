@@ -1,0 +1,5 @@
+.DS_Store
+.kansorc
+packages
+bin/node_modules
+bin/npm-debug.log

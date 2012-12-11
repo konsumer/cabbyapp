@@ -1,0 +1,14 @@
+{
+    "name": "cabbyapp",
+    "version": "0.0.1",
+    "description": "track cabbies/customers",
+    "attachments": "static",
+    "load": "lib/app",
+    "modules": "lib",
+    "attachments": "static",
+    "dependencies": {
+        "modules": null,
+        "properties": null,
+        "attachments": null
+    }
+}

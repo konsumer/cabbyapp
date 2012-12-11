@@ -1,0 +1,11 @@
+{
+    "name": "cabbyapp-genfake",
+    "description": "Generates fake cabbies & customers & relationships between them.",
+    "version": "0.0.1",
+    "private": true,
+    "dependencies": {
+        "optimist": "",
+        "cradle": "",
+        "xml2js": ""
+    }
+}

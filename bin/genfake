@@ -1,0 +1,171 @@
+#!/usr/bin/env node
+/*
+
+Creates some dummy customer/cabby data for couchdb, using names wordlists & kml for trimet stops
+
+Overwrites status relationships to simulate a snapshot of driver/customer activity
+
+*/
+
+try{
+    var fs = require('fs'), xml2js = require('xml2js'), cradle = require('cradle'), optimist = require('optimist');
+}catch(e){
+    console.log("Install dependencies with 'npm install'.");
+}
+
+
+// parse package.json & ../.kansorc for help-text & settings
+var pkg = require('./package.json');
+try{
+    var cfg = require('../.kansorc');
+}catch(e){
+    console.log("You need to create a .kansorc in parent dir, to describe your databases.");
+    process.exit(1);
+}
+
+var argv = optimist
+    .usage(pkg.name + " (v " + pkg.version + ")" + "\n" + pkg.description + "\nUsage: $0 [options]")
+
+    .boolean('?')
+    .describe('?', 'This help message')
+    .alias('?', 'h')
+    .alias('?', 'help')
+    .check(function(argv){
+        if (argv.help || ((!argv.cabbies && !argv.fares || argv.generate == 0) && !argv.relationships)){
+            optimist.showHelp();
+            process.exit();
+        }
+    })
+
+    .default('t', "default")
+    .describe('t', 'Deployment target for couchdb from .kansorc')
+    .alias('t', 'target')
+    .check(function(argv){
+        if (Object.keys(cfg.env).indexOf(argv.target) == -1){
+            throw("Database target (" + argv.target + ") not setup in .kansorc.");
+        }
+    })
+
+    .default('g', 0)
+    .describe('g', 'Number of people to generate')
+    .alias('g', 'generate')
+
+    .boolean('f')
+    .describe('f', 'Generate fares (customers)')
+    .alias('f', 'fares')
+    .alias('f', 'customers')
+
+    .boolean('c')
+    .describe('c', 'Generate cabbies')
+    .alias('c', 'cabbies')
+    .check(function(argv){
+        if (!argv.cabbies && !argv.fares || argv.generate == 0){
+            console.log("no people generated.");
+        }
+    })
+
+    .boolean('r', false)
+    .describe('r', 'Build fake relationships for all cabbie/customers')
+    .alias('r', 'relationships')
+
+    .argv;
+
+var db;
+
+// load database
+var d = cfg.env[argv.target].db.split('/');
+var dname = d.pop();
+var dhost = d.join('');
+var db;
+if (dhost !== ''){
+    db = new(cradle.Connection)(dhost).database(dname);
+}else{
+    db = new(cradle.Connection)().database(dname);
+}
+
+
+// handle user-generation
+if (argv.cabbies || argv.fares){
+    var namesFamily = fs.readFileSync('data/Family-Names', 'utf8').split("\n");
+    var namesGiven = fs.readFileSync('data/Given-Names', 'utf8').split("\n");
+    var namesHosts = fs.readFileSync('data/etc-hosts', 'utf8').split("\n");
+    var suffixHosts = ['com', 'net','edu','org','co.uk'];
+    var date = (new Date()).getTime();
+}
+
+if (argv.cabbies && argv.fares){
+    genUsers(argv.generate/2, 'cabbie');
+    genUsers(argv.generate/2, 'customer');
+}else if (argv.cabbies){
+    genUsers(argv.generate, 'cabbie');
+}else if (argv.fares){
+    genUsers(argv.generate, 'customer');
+}
+
+// handle user-relationships
+if (argv.relationships){
+    genRelationships();
+}
+
+
+function randomPhone(areaCode){
+    out = [];
+    for (var i=0; i< 10;i++){
+        out.push(Math.floor(Math.random()*10));
+    }
+    if (areaCode){
+        areaCode = (areaCode + '').split('');
+        out[0] = areaCode[0];
+        out[1] = areaCode[1];
+        out[2] = areaCode[2];
+    }
+    return parseInt(out.join(''), 10);
+}
+
+function randomEmail(user){
+    return (user.fname + user.lname + '@' + randomLine(namesHosts) + '.' + randomLine(suffixHosts)).toLowerCase();
+}
+
+function randomLine(set){
+    return set[Math.floor(Math.random() * set.length)];
+}
+
+
+function genUsers(count, type){
+    fs.readFile('data/tm_stops.kml', 'utf8', function(err, data) {
+        var parser = new xml2js.Parser();
+        parser.parseString(data, function (err, result) {
+            var coords = [];
+            result.kml.Document[0].Placemark.forEach(function(doc){
+                coords.push(doc.Point[0].coordinates[0].replace(/[ \f\n\r\t\v\u00A0\u2028\u2029]/g, ''));
+            });
+            for (var i=0; i<count; i++){
+                var user = {
+                    verified: true,
+                    fname : randomLine(namesGiven),
+                    lname : randomLine(namesFamily),
+                    phone : randomPhone(503),
+                    location : randomLine(coords).split(','),
+                    generated : date,
+                    type : type
+                };
+                user.email = randomEmail(user);
+
+                db.save(user.type + '_' + user.email, user, function (err, res) {
+                    if (err) throw(err);
+                    console.log(res);
+                });
+            }
+        });
+    });
+}
+
+// replace current user-relationships with random ones
+function genRelationships(){
+    // first get cabbies
+    db.view('getByTypeFull', function (err, res) {
+        if (err) throw(err);
+        console.log(res);
+    });
+}
+
