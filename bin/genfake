@@ -8,16 +8,16 @@ Overwrites status relationships to simulate a snapshot of driver/customer activi
 */
 
 try{
-    var fs = require('fs'), xml2js = require('xml2js'), cradle = require('cradle'), optimist = require('optimist');
+    var fs = require('fs'), path=require('path'), xml2js = require('xml2js'), cradle = require('cradle'), optimist = require('optimist');
 }catch(e){
     console.log("Install dependencies with 'npm install'.");
 }
 
 
 // parse package.json & ../.kansorc for help-text & settings
-var pkg = require('./package.json');
+var pkg = require(path.join(__dirname,'package.json'));
 try{
-    var cfg = require('../.kansorc');
+    var cfg = require(path.join(__dirname, '..', '.kansorc'));
 }catch(e){
     console.log("You need to create a .kansorc in parent dir, to describe your databases.");
     process.exit(1);
@@ -87,9 +87,9 @@ if (dhost !== ''){
 
 // handle user-generation
 if (argv.cabbies || argv.fares){
-    var namesFamily = fs.readFileSync('data/Family-Names', 'utf8').split("\n");
-    var namesGiven = fs.readFileSync('data/Given-Names', 'utf8').split("\n");
-    var namesHosts = fs.readFileSync('data/etc-hosts', 'utf8').split("\n");
+    var namesFamily = fs.readFileSync(path.join(__dirname, 'data', 'Family-Names'), 'utf8').split("\n");
+    var namesGiven = fs.readFileSync(path.join(__dirname, 'data', 'Given-Names'), 'utf8').split("\n");
+    var namesHosts = fs.readFileSync(path.join(__dirname, 'data', 'etc-hosts'), 'utf8').split("\n");
     var suffixHosts = ['com', 'net','edu','org','co.uk'];
     var date = (new Date()).getTime();
 }
