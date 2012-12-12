@@ -37,3 +37,9 @@ like-to-haves:
 *    android/ios-specific app that notifies customer of driver-dispatch (use native googlemaps + notification APIs)
 
 Be sure to checkout bin dir for fixture/mocking options.
+
+For testing locations, use this:
+
+![location](http://maps.googleapis.com/maps/api/staticmap?center=45.382098,-122.758560&zoom=18&size=600x300&maptype=roadmap&sensor=false)
+
+This URL format will show you a lat/long centered.
