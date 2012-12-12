@@ -1,0 +1,26 @@
+#!/usr/bin/env node
+
+var cradle = require('cradle');
+
+
+var cfg = require('../.kansorc');
+
+var db;
+
+// load database
+var d = cfg.env['default'].db.split('/');
+var dname = d.pop();
+var dhost = d.join('/');
+var db;
+console.log(dhost, ' ', dname);
+
+if (dhost !== ''){
+    db = new(cradle.Connection)(dhost).database(dname);
+}else{
+    db = new(cradle.Connection)().database(dname);
+}
+
+db.list({include_docs: true, limit: 10, descending: true}, function(err, doc, headers) {
+    if (err) throw(err.error + ': ' + err.reason);
+    console.dir(doc);
+});

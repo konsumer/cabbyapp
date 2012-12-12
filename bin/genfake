@@ -75,10 +75,10 @@ var db;
 // load database
 var d = cfg.env[argv.target].db.split('/');
 var dname = d.pop();
-var dhost = d.join('');
+var dhost = d.join('/');
 var db;
 if (dhost !== ''){
-    db = new(cradle.Connection)(dhost).database(dname);
+    db = new(cradle.Connection)(dhost, 5984).database(dname);
 }else{
     db = new(cradle.Connection)().database(dname);
 }
