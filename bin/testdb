@@ -15,12 +15,12 @@ var db;
 console.log(dhost, ' ', dname);
 
 if (dhost !== ''){
-    db = new(cradle.Connection)(dhost).database(dname);
+    db = new(cradle.Connection)(dhost, 443).database(dname);
 }else{
     db = new(cradle.Connection)().database(dname);
 }
 
-db.list({include_docs: true, limit: 10, descending: true}, function(err, doc, headers) {
-    if (err) throw(err.error + ': ' + err.reason);
-    console.dir(doc);
-});
+ db.get('_design/cabbyapp', function (err, doc) {
+      if (err) throw(err);
+      console.log(doc);
+  });
