@@ -21,6 +21,6 @@ if (dhost !== ''){
 }
 
  db.get('_design/cabbyapp', function (err, doc) {
-      if (err) throw(err);
-      console.log(doc);
-  });
+  if (err) throw(err);
+  console.log(doc);
+});

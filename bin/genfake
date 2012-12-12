@@ -75,10 +75,11 @@ var db;
 // load database
 var d = cfg.env[argv.target].db.split('/');
 var dname = d.pop();
+var dport = (d[0] == 'https:') ? 443 : 5984;
 var dhost = d.join('/');
 var db;
 if (dhost !== ''){
-    db = new(cradle.Connection)(dhost, 5984).database(dname);
+    db = new(cradle.Connection)(dhost, dport).database(dname);
 }else{
     db = new(cradle.Connection)().database(dname);
 }
