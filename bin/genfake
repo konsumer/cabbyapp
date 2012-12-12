@@ -164,7 +164,7 @@ function genUsers(count, type){
 // replace current user-relationships with random ones
 function genRelationships(){
     // first get cabbies
-    db.view('getByTypeFull', function (err, res) {
+    db.view('cabbyapp/getByTypeFull', {key:'cabbie'}, function (err, res) {
         if (err) throw(err);
         console.log(res);
     });
