@@ -1,6 +1,6 @@
 # CabbyApp
 
-Track cabbies, cutomers, and allow dispatch of rides by customer or dispatcher & pickup notification by cabbie.
+Track cabbies, customers, and allow dispatch of rides by customer or dispatcher & pickup notification by cabbie.
 
 It is currently running [here](http://cabby.jetboystudio.com/)
 
